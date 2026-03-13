@@ -22,7 +22,7 @@ instalar_se_falta <- function(pkgs) {
 instalar_se_falta(required_pkgs)
 
 PROJ_ROOT <- tryCatch(dirname(normalizePath(sys.frame(1)$ofile)), error = function(e) "/srv/shiny-server/bsbstay")
-source(file.path(PROJ_ROOT, "R", "gdrive_public.R"), local = FALSE)
+source(file.path(PROJ_ROOT, "gdrive_public.R"), local = FALSE)
 
 # ── Helpers ────────────────────────────────────────────────────
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0 || (length(x) == 1 && is.na(x))) y else x
