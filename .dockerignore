@@ -1,0 +1,16 @@
+# Ignorar arquivos desnecessários no build
+*.Rproj
+.Rproj.user/
+.Rhistory
+.RData
+.git/
+.gitignore
+
+# Cache local (será recriado no container)
+data/cache/
+data/raw/
+
+# Arquivos de desenvolvimento
+setup.R
+README.md
+*.md
