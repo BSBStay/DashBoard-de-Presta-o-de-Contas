@@ -21,7 +21,14 @@ instalar_se_falta <- function(pkgs) {
 }
 instalar_se_falta(required_pkgs)
 
-PROJ_ROOT <- tryCatch(dirname(normalizePath(sys.frame(1)$ofile)), error = function(e) "/srv/shiny-server/bsbstay")
+PROJ_ROOT <- tryCatch(
+  dirname(normalizePath(sys.frame(1)$ofile)),
+  error = function(e) {
+    # Render.com: app fica em /srv/shiny-server/app
+    app_dir <- "/srv/shiny-server/app"
+    if (dir.exists(app_dir)) app_dir else getwd()
+  }
+)
 source(file.path(PROJ_ROOT, "gdrive_public.R"), local = FALSE)
 
 # ── Helpers ────────────────────────────────────────────────────
