@@ -21,15 +21,35 @@ instalar_se_falta <- function(pkgs) {
 }
 instalar_se_falta(required_pkgs)
 
-PROJ_ROOT <- tryCatch(
-  dirname(normalizePath(sys.frame(1)$ofile)),
+# ── Log de diagnóstico em /tmp (visível nos logs do Render) ────
+.log <- function(...) {
+  msg <- paste0("[BSBStay] ", paste(..., sep=""), "\n")
+  cat(msg)
+  tryCatch(write(msg, "/tmp/bsbstay_init.log", append=TRUE), error=function(e) NULL)
+}
+
+# Detecta o diretório do app
+.candidates <- c(
+  tryCatch(dirname(normalizePath(sys.frame(1)$ofile)), error = function(e) NA_character_),
+  "/srv/shiny-server/app",
+  getwd()
+)
+.candidates <- .candidates[!is.na(.candidates)]
+.found <- .candidates[file.exists(file.path(.candidates, "gdrive_public.R"))]
+PROJ_ROOT <- if (length(.found) > 0) .found[1] else .candidates[1]
+rm(.candidates, .found)
+.log("PROJ_ROOT = ", PROJ_ROOT)
+.log("gdrive_public.R existe: ", file.exists(file.path(PROJ_ROOT, "gdrive_public.R")))
+.log("list.files: ", paste(list.files(PROJ_ROOT), collapse=", "))
+
+tryCatch(
+  source(file.path(PROJ_ROOT, "gdrive_public.R"), local = FALSE),
   error = function(e) {
-    # Render.com: app fica em /srv/shiny-server/app
-    app_dir <- "/srv/shiny-server/app"
-    if (dir.exists(app_dir)) app_dir else getwd()
+    .log("ERRO FATAL no source(gdrive_public.R): ", e$message)
+    stop(e)
   }
 )
-source(file.path(PROJ_ROOT, "gdrive_public.R"), local = FALSE)
+.log("gdrive_public.R carregado OK")
 
 # ── Helpers ────────────────────────────────────────────────────
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0 || (length(x) == 1 && is.na(x))) y else x
@@ -66,10 +86,15 @@ frow <- function(lbl, val, neg = FALSE) {
 }
 
 # ── Carregamento inicial ────────────────────────────────────────
-APP_DATA <- tryCatch(
-  carregar_dados_app(folder_id = DRIVE_FOLDER_ID, forcar_dl = FALSE, forcar_etl = FALSE),
-  error = function(e) { structure(list(), erro_msg = e$message) }
-)
+# Dados carregados na inicializacao — app sobe mesmo se o Drive falhar
+APP_DATA      <- NULL
+APP_DATA_ERRO <- NULL
+tryCatch({
+  APP_DATA      <<- carregar_dados_app(folder_id = DRIVE_FOLDER_ID, forcar_dl = FALSE, forcar_etl = FALSE)
+}, error = function(e) {
+  APP_DATA_ERRO <<- e$message
+  message("[BSBStay] ERRO ao carregar dados: ", e$message)
+})
 
 # ═══════════════════════════════════════════════════════════════
 # UI
