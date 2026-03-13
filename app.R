@@ -21,7 +21,7 @@ instalar_se_falta <- function(pkgs) {
 }
 instalar_se_falta(required_pkgs)
 
-PROJ_ROOT <- "C:/Users/Mateu/OneDrive - unb.br/ESTAT/BSBSTAY - Dados 1/bsbstay_shiny_app/bsbstay/"
+PROJ_ROOT <- tryCatch(dirname(normalizePath(sys.frame(1)$ofile)), error = function(e) "/srv/shiny-server/bsbstay")
 source(file.path(PROJ_ROOT, "R", "gdrive_public.R"), local = FALSE)
 
 # ── Helpers ────────────────────────────────────────────────────
