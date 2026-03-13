@@ -9,8 +9,14 @@
 DRIVE_FOLDER_ID <- "1753AZxwmyyWYS2oYQPLeMHIz5gM8bscb"
 DRIVE_FILE_ID   <- "1fnereY6JOrAbSl1yw_o_U94Fb0KTuHGJU85GEUrCBiU"
 
-CACHE_XLSX      <- file.path(PROJ_ROOT, "data", "cache", "db_master_drive.xlsx")
-SQLITE_PATH     <- file.path(PROJ_ROOT, "data", "cache", "bsbstay.sqlite")
+# No Render/container o diretório do app é read-only — usa /tmp para cache
+.cache_dir  <- if (file.access(file.path(PROJ_ROOT, "data"), 2) == 0)
+  file.path(PROJ_ROOT, "data", "cache")
+else
+  file.path("/tmp", "bsbstay_cache")
+dir.create(.cache_dir, recursive = TRUE, showWarnings = FALSE)
+CACHE_XLSX  <- file.path(.cache_dir, "db_master_drive.xlsx")
+SQLITE_PATH <- file.path(.cache_dir, "bsbstay.sqlite")
 CACHE_META_KEY  <- "last_drive_sync"
 MAX_CACHE_AGE_H <- 6
 
